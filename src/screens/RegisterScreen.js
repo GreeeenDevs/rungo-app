@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, Alert } from 'react-native';
 import { auth } from '../config/firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
-const CadastroScreen = ({ navigation }) => {
+const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -28,4 +28,4 @@ const CadastroScreen = ({ navigation }) => {
   );
 };
 
-export default CadastroScreen;
+export default RegisterScreen;

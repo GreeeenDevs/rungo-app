@@ -25,7 +25,7 @@ const LoginScreen = ({ navigation }) => {
       <Text>Senha:</Text>
       <TextInput value={password} onChangeText={setPassword} secureTextEntry />
       <Button title="Entrar" onPress={handleLogin} />
-      <Button title="Cadastrar" onPress={() => navigation.navigate('Cadastro')} />
+      <Button title="Cadastrar" onPress={() => navigation.navigate('Register')} />
     </View>
   );
 };
