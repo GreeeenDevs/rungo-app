@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert } from 'react-native';
-import { auth } from '../config/firebaseConfig';
+import { auth, db } from '../config/firebaseConfig'; // Importe o db
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore'; // Importe as funções do Firestore
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
@@ -11,8 +12,25 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await AsyncStorage.setItem('jwt_token', userCredential.user.uid);
-      navigation.replace('Home'); // Direciona para Home
+      const user = userCredential.user;
+
+      if (user) {
+        // Busca os dados do usuário no Firestore usando o UID
+        const userDocRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(userDocRef);
+
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          // Aqui você pode usar os dados do usuário (userData) conforme necessário
+          console.log('Dados do usuário logado:', userData);
+          await AsyncStorage.setItem('jwt_token', user.uid);
+          navigation.replace('Home'); // Direciona para Home
+        } else {
+          Alert.alert('Erro', 'Dados do usuário não encontrados no banco de dados.');
+          // Opcional: Desconectar o usuário se os dados não forem encontrados
+          // auth.signOut();
+        }
+      }
     } catch (error) {
       Alert.alert('Erro', error.message);
     }
