@@ -1,6 +1,3 @@
-```markdown
-# Rungo App - README
-
 Este documento fornece instruções para instalar as dependências e iniciar o projeto Rungo App, que consiste em um backend Node.js e um frontend React Native.
 
 ## Estrutura do Projeto
@@ -146,4 +143,3 @@ rungo-app/
     Certifique-se de que seu emulador/simulador esteja em execução ou que um dispositivo esteja conectado ao seu computador.
 
 Este guia deve fornecer os passos iniciais para configurar e executar o projeto Rungo App. Certifique-se de adaptar as configurações conforme necessário para o seu ambiente específico.
-```
