@@ -2,6 +2,7 @@ Este documento fornece instruções para instalar as dependências e iniciar o p
 
 ## Estrutura do Projeto
 
+```markdown
 rungo-app/
 ├── backend/
 │   ├── server.js
@@ -33,6 +34,7 @@ rungo-app/
 │   │   │   └── StoreScreen.js
 │   │   └── ... (outros arquivos do frontend)
 └── README.md
+```
 
 ## Backend
 
