@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView } from 'react-native';
 import Button from '../components/Button'; // Importa o componente de botão
+import BG from '../../assets/bgscream.gif'
+
 
 const HomeScreen = ({ navigation }) => { // Navigation ainda é útil se você tiver fluxos internos da Home para Stack Navigator
   return (
-    <ImageBackground source={require('../assets/bgscream.gif')} style={styles.background}>
+    <ImageBackground source={BG} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>RunGO APP</Text>
         <Text style={styles.subtitle}>Sua jornada começa agora!</Text>

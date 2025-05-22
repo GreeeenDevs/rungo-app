@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, ImageBackground } from 'react-native';
 import Button from '../components/Button'; // Importe o componente de botão
+import BG from '../../assets/bgscream.gif'
 
 // Definição da classe Bichinho (sem alterações na lógica)
 class Bichinho {
@@ -93,7 +94,7 @@ const BichinhoGameScreen = ({ navigation }) => {
   }, [bichinho]);
 
   return (
-    <ImageBackground source={require('../assets/bgscream.gif')} style={styles.background}>
+    <ImageBackground source={BG} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Removido o botão de voltar, pois agora estará em uma aba */}
         {/* <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>

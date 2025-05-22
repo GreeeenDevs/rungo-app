@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { TouchableOpacity, View, Text, TextInput, Button, Alert, StyleSheet, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BG from '../../assets/bgscream.gif'
 
-const API_URL = 'http://192.168.0.134:3000'; 
+
+const API_URL = 'http://10.68.76.230:3000'; 
 
 const LoginScreen = ({ navigation, setLoggedIn }) => { // Receba a prop setLoggedIn
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
@@ -15,7 +17,7 @@ const LoginScreen = ({ navigation, setLoggedIn }) => { // Receba a prop setLogge
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
@@ -33,7 +35,7 @@ const LoginScreen = ({ navigation, setLoggedIn }) => { // Receba a prop setLogge
   };
 
  return (
-    <ImageBackground source={require('../assets/background.png')} style={styles.background}>
+    <ImageBackground source={BG} style={styles.background}>
       <View style={styles.overlay}>
         <Text style={styles.title}>Bem-vindo ao Rungo APP</Text>
         <TextInput

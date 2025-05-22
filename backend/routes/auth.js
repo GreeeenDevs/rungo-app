@@ -11,20 +11,20 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const USERS_COLLECTION = 'users';
 
 router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
+  if (!username || !password) {
     return res.status(400).json({ message: 'Por favor, forneça e-mail e senha.' });
   }
 
   try {
-    const userSnapshot = await db.collection(USERS_COLLECTION).where('email', '==', email).get();
+    const userSnapshot = await db.collection(USERS_COLLECTION).where('username', '==', username).get();
     if (!userSnapshot.empty) {
       return res.status(409).json({ message: 'Este e-mail já está registrado.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = { email, password: hashedPassword, role: 'user' };
+    const newUser = { username, password: hashedPassword, role: 'user' };
     const docRef = await db.collection(USERS_COLLECTION).add(newUser);
 
     res.status(201).json({ message: 'Usuário registrado com sucesso!', userId: docRef.id });
@@ -35,14 +35,14 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  console.log('Tentativa de login para o email:', email);
+  const { username, password } = req.body;
+  console.log('Tentativa de login para o username:', username);
   console.log('JWT_SECRET em routes/auth:', JWT_SECRET); // Verifique o valor aqui
 
   try {
-    const userSnapshot = await db.collection(USERS_COLLECTION).where('email', '==', email).limit(1).get();
+    const userSnapshot = await db.collection(USERS_COLLECTION).where('username', '==', username).limit(1).get();
     if (userSnapshot.empty) {
-      console.log('Usuário não encontrado para o email:', email);
+      console.log('Usuário não encontrado para o username:', username);
       return res.status(401).json({ message: 'Credenciais inválidas.' });
     }
 
@@ -61,7 +61,7 @@ router.post('/login', async (req, res) => {
       return res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 
-    const token = jwt.sign({ userId, email: userData.email, role: userData.role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId, username: userData.username, role: userData.role }, JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (error) {
     console.error('Erro ao fazer login:', error);

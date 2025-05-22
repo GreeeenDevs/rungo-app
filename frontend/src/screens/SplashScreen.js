@@ -8,6 +8,8 @@ import {
   ImageBackground,
   TouchableWithoutFeedback, // Importe este componente
 } from 'react-native';
+import BG from '../../assets/bgscream.gif'
+
 
 const SplashScreen = ({ navigation }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current; // Valor inicial para opacidade
@@ -47,7 +49,7 @@ const SplashScreen = ({ navigation }) => {
   return (
     <ImageBackground
       // Certifique-se que 'splash_background.gif' é o nome exato do seu arquivo
-      source={require('../assets/bgscream.gif')}
+      source={BG}
       style={styles.background}
       resizeMode="cover"
     >

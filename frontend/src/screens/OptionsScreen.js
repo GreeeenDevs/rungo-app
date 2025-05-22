@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Importe para logout
+import BG from '../../assets/bgscream.gif'
+
 
 const OptionsScreen = ({ navigation, setLoggedIn }) => { // Recebe setLoggedIn
   const handleLogout = async () => {
@@ -15,7 +17,7 @@ const OptionsScreen = ({ navigation, setLoggedIn }) => { // Recebe setLoggedIn
   };
 
   return (
-    <ImageBackground source={require('../assets/background.png')} style={styles.background}>
+    <ImageBackground source={BG} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Opções</Text>
         <Text style={styles.subtitle}>Ajuste suas configurações!</Text>

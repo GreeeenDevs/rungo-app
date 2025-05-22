@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, ImageBackground } from 'react-native';
+import LD from '../../assets/loading.gif'
+
 
 const LoadingScreen = ({ navigation }) => {
   useEffect(() => {
@@ -15,7 +17,7 @@ const LoadingScreen = ({ navigation }) => {
 
   return (
     <ImageBackground
-      source={require('../assets/loading.gif')} // **SEU GIF AQUI**
+      source={LD} // **SEU GIF AQUI**
       style={styles.background}
       resizeMode="cover" // Garante que o GIF cubra toda a área
     >

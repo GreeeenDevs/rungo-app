@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView } from 'react-native';
+import BG from '../../assets/bgscream.gif'
+
 
 const CollectionScreen = () => {
   return (
-    <ImageBackground source={require('../assets/bgscream.gif')} style={styles.background}>
+    <ImageBackground source={BG} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Minha Coleção</Text>
         <Text style={styles.subtitle}>Seus Rungos estão aqui!</Text>

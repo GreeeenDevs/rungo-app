@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView, TouchableOpacity, Alert } from 'react-native';
 // Certifique-se de que o componente Button esteja em '../components/Button'
 import Button from '../components/Button';
+import BG from '../../assets/bgscream.gif'
+
 
 const OvosDisponiveis = [
   { id: 'comum', tipo: 'Comum', descricao: 'Um ovo simples e leal.', preco: 100 },
@@ -32,7 +34,7 @@ const ShopScreen = ({ navigation }) => { // Removido 'route' por enquanto
   };
 
   return (
-    <ImageBackground source={require('../assets/bgscream.gif')} style={styles.background}>
+    <ImageBackground source={BG} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Loja de Ovos</Text>
         <Text style={styles.subtitle}>Escolha seu próximo companheiro!</Text>

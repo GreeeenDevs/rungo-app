@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { TouchableOpacity , ImageBackground, StyleSheet, View, Text, TextInput, Button, Alert } from 'react-native';
+import BG from '../../assets/bgscream.gif'
 
-const API_URL = 'http://192.168.0.134:3000'; 
+
+const API_URL = 'http://10.68.76.230:3000'; 
 
 const RegisterScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleCadastro = async () => {
+  const handleRegister = async () => {
     try {
       const response = await fetch(`${API_URL}/auth/register`, { // Endpoint de registro no backend
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
@@ -31,7 +34,7 @@ const RegisterScreen = ({ navigation }) => {
   };
 
    return (
-    <ImageBackground source={require('../assets/background.png')} style={styles.background}>
+    <ImageBackground source={BG} style={styles.background}>
       <View style={styles.overlay}>
         <Text style={styles.title}>Cadastro</Text>
         <TextInput
@@ -41,16 +44,7 @@ const RegisterScreen = ({ navigation }) => {
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="E-mail"
-          placeholderTextColor="#ccc"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+        />        
         <TextInput
           style={styles.input}
           placeholder="Senha"
