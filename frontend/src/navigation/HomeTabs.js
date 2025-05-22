@@ -1,26 +1,27 @@
-// ./src/navigation/HomeTabs.js
-import React from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "../screens/HomeScreen";
-import StoreScreen from "../screens/StoreScreen";
-import SettingsScreen from "../screens/SettingsScreen";
+// src/navigation/HomeTabs.js (era src/navigation/AppNavigator.js)
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 
-const Tab = createBottomTabNavigator();
+import SplashScreen from '../screens/SplashScreen';
+import TransitionScreen from '../screens/TransitionScreen';
+import LoadingScreen from '../screens/LoadingScreen';
+import TabNavigator from './TabNavigator'; // Seu TabNavigator atual
 
-const HomeTabs = ({ setLoggedIn }) => {
-  console.log("HomeTabs.js: setLoggedIn prop =", setLoggedIn);
+const Stack = createStackNavigator();
+
+// Esta função agora representa o fluxo APÓS o login (Splash -> Loading -> Tabs)
+const HomeTabs = ({ setLoggedIn }) => { // Recebe setLoggedIn para poder fazer logout
   return (
-    <Tab.Navigator>
-      <Tab.Screen
-        name="Home"
-        component={(props) => {
-          console.log("HomeTabs.js: Props para HomeScreen =", props);
-          return <HomeScreen {...props} setLoggedIn={setLoggedIn} />;
-        }}
+    <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Transition" component={TransitionScreen} />
+      <Stack.Screen name="Loading" component={LoadingScreen} />
+      {/* O nome da rota aqui é 'MainTabs' para o TabNavigator */}
+      <Stack.Screen
+        name="MainTabs"
+        component={(props) => <TabNavigator {...props} setLoggedIn={setLoggedIn} />}
       />
-      <Tab.Screen name="Store" component={StoreScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
-    </Tab.Navigator>
+    </Stack.Navigator>
   );
 };
 

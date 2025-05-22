@@ -1,20 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView } from 'react-native';
-import Button from '../components/Button'; // Importa o componente de botão
 
-const HomeScreen = ({ navigation }) => { // Navigation ainda é útil se você tiver fluxos internos da Home para Stack Navigator
+const CollectionScreen = () => {
   return (
     <ImageBackground source={require('../assets/bgscream.gif')} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>RunGO APP</Text>
-        <Text style={styles.subtitle}>Sua jornada começa agora!</Text>
-
-        <View style={styles.buttonContainer}>
-          {/* Este botão pode ser para iniciar uma partida TCG real ou outra funcionalidade */}
-          <Button title="LOJA" onPress={() => alert('escolha seu primeiro ovo')} />
-          {/* Os botões de Coleção, Loja, Opções foram removidos, pois agora são abas */}
-        </View>
-
+        <Text style={styles.title}>Minha Coleção</Text>
+        <Text style={styles.subtitle}>Seus Rungos estão aqui!</Text>
+        {/* Conteúdo da coleção de cartas */}
       </ScrollView>
     </ImageBackground>
   );
@@ -33,7 +26,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   title: {
-    fontSize: 42,
+    fontSize: 38,
     fontWeight: 'bold',
     color: '#FFCB05',
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
@@ -43,7 +36,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 22,
+    fontSize: 20,
     color: '#FFFFFF',
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
@@ -51,10 +44,6 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     textAlign: 'center',
   },
-  buttonContainer: {
-    width: '80%',
-    marginTop: 20,
-  },
 });
 
-export default HomeScreen;
+export default CollectionScreen;
