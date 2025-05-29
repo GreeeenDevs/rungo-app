@@ -1,72 +1,96 @@
-// ./routes/auth.js
-require('dotenv').config();
+// pet-happiness-backend/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { db } = require('../config/firebase-admin-config');
+const bcrypt = require('bcryptjs');
+const { db } = require('../config/firebase-admin-config'); // Importa 'db' do Firestore
 
-// Acessa JWT_SECRET diretamente da variável de ambiente
-const JWT_SECRET = process.env.JWT_SECRET;
 const USERS_COLLECTION = 'users';
 
+const generateToken = (userId) => {
+    return jwt.sign({ userId }, process.env.JWT_SECRET, {
+        expiresIn: '1d', // Token expira em 1 dia
+    });
+};
+
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+    const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Por favor, forneça e-mail e senha.' });
-  }
-
-  try {
-    const userSnapshot = await db.collection(USERS_COLLECTION).where('username', '==', username).get();
-    if (!userSnapshot.empty) {
-      return res.status(409).json({ message: 'Este e-mail já está registrado.' });
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Por favor, insira username e password.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = { username, password: hashedPassword, role: 'user' };
-    const docRef = await db.collection(USERS_COLLECTION).add(newUser);
+    try {
+        const userRef = db.collection(USERS_COLLECTION).doc(username);
+        const userDoc = await userRef.get();
 
-    res.status(201).json({ message: 'Usuário registrado com sucesso!', userId: docRef.id });
-  } catch (error) {
-    console.error('Erro ao registrar usuário:', error);
-    res.status(500).json({ message: 'Erro ao criar conta.' });
-  }
+        if (userDoc.exists) {
+            return res.status(400).json({ message: 'Usuário já existe.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await userRef.set({
+            username: username,
+            password: hashedPassword,
+            role: 'user', // Define um papel padrão
+            createdAt: new Date(),
+        });
+
+        // Criar um pet inicial para o novo usuário no Firestore
+        await db.collection('pets').doc(username).set({ // O ID do documento pet é o username do usuário
+            ownerId: username, // Link para o usuário
+            name: 'Ovo Desconhecido', // Começa como um ovo
+            stage: 'Ovo',
+            happiness: 50,
+            fome: 0, // Inicia sem fome
+            energia: 100, // Inicia com energia total
+            lastFed: new Date(),
+            lastPlayed: new Date(),
+            lastSlept: new Date(),
+            lastStepsUpdate: new Date(),
+            totalStepsLife: 0,
+            dailyStepsGoal: 5000,
+            evolutionProgress: 0, // 0 = ovo, 1 = filhote, 2 = adulto, etc.
+            createdAt: new Date(),
+        });
+
+
+        res.status(201).json({
+            message: 'Usuário registrado com sucesso!',
+            userId: username,
+        });
+    } catch (err) {
+        console.error('Erro no registro:', err);
+        res.status(500).json({ message: 'Erro no servidor ao registrar usuário.' });
+    }
 });
 
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  console.log('Tentativa de login para o username:', username);
-  console.log('JWT_SECRET em routes/auth:', JWT_SECRET); // Verifique o valor aqui
+    const { username, password } = req.body;
 
-  try {
-    const userSnapshot = await db.collection(USERS_COLLECTION).where('username', '==', username).limit(1).get();
-    if (userSnapshot.empty) {
-      console.log('Usuário não encontrado para o username:', username);
-      return res.status(401).json({ message: 'Credenciais inválidas.' });
+    try {
+        const userDoc = await db.collection(USERS_COLLECTION).doc(username).get();
+
+        if (!userDoc.exists) {
+            return res.status(400).json({ message: 'Credenciais inválidas.' });
+        }
+
+        const user = userDoc.data();
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Credenciais inválidas.' });
+        }
+
+        res.json({
+            message: 'Login bem-sucedido!',
+            token: generateToken(username), // Gere o token com o userId (username neste caso)
+        });
+    } catch (err) {
+        console.error('Erro no login:', err);
+        res.status(500).json({ message: 'Erro no servidor ao fazer login.' });
     }
-
-    const userData = userSnapshot.docs[0].data();
-    const userId = userSnapshot.docs[0].id;
-    console.log('Usuário encontrado:', userData);
-
-    const passwordMatch = await bcrypt.compare(password, userData.password);
-    console.log('Resultado da comparação de senha:', passwordMatch);
-    if (!passwordMatch) {
-      return res.status(401).json({ message: 'Credenciais inválidas.' });
-    }
-
-    if (!JWT_SECRET) {
-      console.error('Erro: JWT_SECRET não está definido em routes/auth!');
-      return res.status(500).json({ message: 'Erro interno do servidor.' });
-    }
-
-    const token = jwt.sign({ userId, username: userData.username, role: userData.role }, JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-  } catch (error) {
-    console.error('Erro ao fazer login:', error);
-    res.status(500).json({ message: 'Erro ao autenticar.' });
-  }
 });
 
 module.exports = router;

@@ -1,47 +1,39 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, View, Text, TextInput, Button, Alert, StyleSheet, ImageBackground } from 'react-native';
+import { TouchableOpacity, View, Text, TextInput, Alert, StyleSheet, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BG from '../../assets/bgscream.gif'
+import BG from '../../assets/bgscream.gif';
+import { loginUser } from '../services/apiService'; // Importa a função de login
 
-
-const API_URL = 'http://10.68.76.230:3000'; 
-
-const LoginScreen = ({ navigation, setLoggedIn }) => { // Receba a prop setLoggedIn
+const LoginScreen = ({ navigation, setLoggedIn }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const data = await loginUser(username, password); // Chama a função do apiService
 
-      const data = await response.json();
-
-      if (response.ok && data.token) {
+      if (data && data.token) {
         await AsyncStorage.setItem('jwt_token', data.token);
-        setLoggedIn(true); // Atualize o estado de login no App.js
-        // Não precisa de navigation.replace('Main') aqui
+        setLoggedIn(true);
+        Alert.alert('Sucesso', data.message || 'Login bem-sucedido!');
       } else {
+        // A apiService já trata o erro e mostra um Alert se !response.ok
         Alert.alert('Erro ao Logar', data.message || 'Credenciais inválidas.');
       }
     } catch (error) {
-      Alert.alert('Erro de Conexão', 'Não foi possível conectar ao servidor.');
+      // Erro já tratado pelo apiService, mas você pode adicionar logs aqui se precisar
+      console.error('Erro no componente LoginScreen:', error);
     }
   };
 
- return (
+  return (
     <ImageBackground source={BG} style={styles.background}>
       <View style={styles.overlay}>
-        <Text style={styles.title}>Bem-vindo ao Rungo APP</Text>
+        <Text style={styles.title}>Bem-vindo de volta!</Text>
         <TextInput
           style={styles.input}
-          placeholder="Usuário"
-          placeholderTextColor="#ccc"
+          placeholder="Nome de usuário"
+          placeholderTextColor="#aaa"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
@@ -49,7 +41,7 @@ const LoginScreen = ({ navigation, setLoggedIn }) => { // Receba a prop setLogge
         <TextInput
           style={styles.input}
           placeholder="Senha"
-          placeholderTextColor="#ccc"
+          placeholderTextColor="#aaa"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -58,7 +50,7 @@ const LoginScreen = ({ navigation, setLoggedIn }) => { // Receba a prop setLogge
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.registerText}>Não tem conta? Cadastre-se</Text>
+          <Text style={styles.registerText}>Não tem uma conta? Cadastre-se</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -101,8 +93,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#3D7DCA',
     paddingVertical: 15,
     paddingHorizontal: 40,
-    borderRadius: 10,
-    marginTop: 20,
+    borderRadius: 8,
+    marginTop: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -110,19 +102,17 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   buttonText: {
-    color: '#FFDE00',
-    fontSize: 20,
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   registerText: {
-    color: '#ADD8E6', // Light Blue
+    color: '#FFCB05',
     marginTop: 20,
     fontSize: 16,
-    textDecorationLine: 'underline',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 5,
   },
 });
 

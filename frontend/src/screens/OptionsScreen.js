@@ -1,13 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Importe para logout
-import BG from '../../assets/bgscream.gif'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BG from '../../assets/bgscream.gif';
 
-
-const OptionsScreen = ({ navigation, setLoggedIn }) => { // Recebe setLoggedIn
+const OptionsScreen = ({ navigation, setLoggedIn }) => {
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem('userToken'); // Remove o token
+      await AsyncStorage.removeItem('jwt_token'); // Remove o token
       setLoggedIn(false); // Define o estado para deslogado
       Alert.alert('Sucesso', 'Você foi desconectado!');
     } catch (error) {
@@ -65,19 +64,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   logoutButton: {
-    backgroundColor: '#c0392b', // Vermelho para Logout
+    backgroundColor: '#DC3545', // Cor de alerta/perigo
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 8,
-    marginTop: 50,
+    marginTop: 30,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   logoutButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
   },

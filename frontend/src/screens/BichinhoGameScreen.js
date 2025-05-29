@@ -1,147 +1,188 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, ImageBackground } from 'react-native';
-import Button from '../components/Button'; // Importe o componente de botão
-import BG from '../../assets/bgscream.gif'
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, Alert, ImageBackground, TextInput, TouchableOpacity } from 'react-native';
+import Button from '../components/Button';
+import BG from '../../assets/bgscream.gif';
+import { getPetStatus, hatchPet, feedPet, playWithPet, sleepPet, updatePetHappiness } from '../services/apiService';
+import { useFocusEffect } from '@react-navigation/native'; // Para recarregar dados ao focar na tela
 
-// Definição da classe Bichinho (sem alterações na lógica)
-class Bichinho {
-  constructor(nome, estagio, felicidade, fome, energia) {
-    this.nome = nome;
-    this.estagio = estagio; // Filhote, Adulto, Idoso
-    this.felicidade = felicidade; // Nível de felicidade (0-100)
-    this.fome = fome; // Nível de fome (0-100)
-    this.energia = energia; // Nível de energia (0-100)
-  }
+// Imagens dos estágios (ajuste os caminhos conforme seus assets)
+import eggImage from '../../assets/egg.gif'; // Exemplo
+import babyImage from '../../assets/baby.gif'; // Exemplo
+import adultImage from '../../assets/adult.gif'; // Exemplo
+import oldImage from '../../assets/old.gif'; // Exemplo
 
-  alimentar() {
-    this.fome = Math.max(0, this.fome - 20);
-    this.felicidade = Math.min(100, this.felicidade + 10);
-    this.energia = Math.min(100, this.energia + 5);
-    Alert.alert('Ação', `${this.nome} foi alimentado.`);
-  }
+const BichinhoGameScreen = () => {
+  const [pet, setPet] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [petName, setPetName] = useState('');
+  const [showHatchInput, setShowHatchInput] = useState(false); // Novo estado para controlar a visibilidade do input
+  const [stepsInput, setStepsInput] = useState('');
 
-  brincar() {
-    this.felicidade = Math.min(100, this.felicidade + 15);
-    this.fome = Math.min(100, this.fome + 10);
-    this.energia = Math.max(0, this.energia - 15);
-    Alert.alert('Ação', `${this.nome} brincou.`);
-  }
 
-  descansar() {
-    this.energia = Math.min(100, this.energia + 25);
-    this.fome = Math.min(100, this.fome + 5);
-    Alert.alert('Ação', `${this.nome} descansou.`);
-  }
-
-  atualizarEstado() {
-    const eventoAleatorio = Math.random();
-
-    if (eventoAleatorio < 0.2) {
-      this.fome = Math.min(100, this.fome + 10);
-    } else if (eventoAleatorio < 0.4) {
-      this.energia = Math.max(0, this.energia - 5);
-    } else if (eventoAleatorio < 0.6) {
-      this.felicidade = Math.max(0, this.felicidade - 10);
+  const fetchPetStatus = useCallback(async () => {
+    setLoading(true);
+    try {
+      const petData = await getPetStatus();
+      setPet(petData);
+      setShowHatchInput(false); // Esconde o input de chocar se o pet for encontrado
+    } catch (error) {
+      console.error("Erro ao buscar status do pet:", error);
+      if (error.message.includes('Bichinho não encontrado') || error.message.includes('404')) {
+        setPet(null); // Define pet como null para indicar que não há pet chocado
+        setShowHatchInput(true); // Mostra o input para chocar o ovo
+      }
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    if (this.estagio === 'Filhote' && this.energia > 90 && this.fome < 20 && this.felicidade > 80) {
-      this.estagio = 'Adulto';
-      Alert.alert('Evolução!', `${this.nome} cresceu e se tornou um adulto!`);
+  useFocusEffect( // Recarrega sempre que a tela for focada
+    useCallback(() => {
+      fetchPetStatus();
+      const interval = setInterval(() => {
+        fetchPetStatus(); // Recarrega o estado do pet a cada X segundos para refletir decadência
+      }, 60 * 1000); // A cada 1 minuto (ajuste conforme a necessidade da decadência)
+
+      return () => clearInterval(interval);
+    }, [fetchPetStatus])
+  );
+
+
+  const handleHatchPet = async () => {
+    if (!petName.trim()) {
+      Alert.alert('Erro', 'Por favor, dê um nome ao seu bichinho!');
+      return;
     }
-  }
-}
-
-// Definição da classe Ovo (sem alterações na lógica)
-class Ovo {
-  constructor(id, tipo) {
-    this.id = id;
-    this.tipo = tipo;
-  }
-
-  eclosao() {
-    const tiposDeBichinho = ['Cachorro', 'Gato', 'Pássaro'];
-    const indiceAleatorio = Math.floor(Math.random() * tiposDeBichinho.length);
-    return new Bichinho(tiposDeBichinho[indiceAleatorio], 'Filhote', 50, 50, 50);
-  }
-}
-
-const BichinhoGameScreen = ({ navigation }) => {
-  const [bichinho, setBichinho] = useState(null);
-
-  const selecionarOvo = (tipoOvo) => {
-    const ovoSelecionado = new Ovo(1, tipoOvo);
-    setBichinho(ovoSelecionado.eclosao());
+    try {
+      const hatchedPet = await hatchPet(petName);
+      setPet(hatchedPet);
+      Alert.alert('Sucesso', `Parabéns! Seu bichinho ${hatchedPet.name} nasceu!`);
+      setShowHatchInput(false);
+    } catch (error) {
+      console.error("Erro ao chocar pet:", error);
+      Alert.alert('Erro', 'Não foi possível chocar o bichinho.');
+    }
   };
 
-  useEffect(() => {
-    if (bichinho) {
-      const intervalId = setInterval(() => {
-        setBichinho(prevBichinho => {
-          const novoBichinho = new Bichinho(
-            prevBichinho.nome,
-            prevBichinho.estagio,
-            prevBichinho.felicidade,
-            prevBichinho.fome,
-            prevBichinho.energia
-          );
-          novoBichinho.atualizarEstado();
-          return novoBichinho;
-        });
-      }, 3000);
-
-      return () => clearInterval(intervalId);
+  const handleFeed = async () => {
+    try {
+      const updatedPet = await feedPet();
+      setPet(updatedPet);
+      Alert.alert('Ação', `${updatedPet.name} foi alimentado!`);
+    } catch (error) {
+      Alert.alert('Erro', error.message || 'Não foi possível alimentar o bichinho.');
     }
-  }, [bichinho]);
+  };
+
+  const handlePlay = async () => {
+    try {
+      const updatedPet = await playWithPet();
+      setPet(updatedPet);
+      Alert.alert('Ação', `${updatedPet.name} adorou brincar!`);
+    } catch (error) {
+      Alert.alert('Erro', error.message || 'Não foi possível brincar com o bichinho.');
+    }
+  };
+
+  const handleSleep = async () => {
+    try {
+      const updatedPet = await sleepPet();
+      setPet(updatedPet);
+      Alert.alert('Ação', `${updatedPet.name} tirou uma soneca e recuperou energia!`);
+    } catch (error) {
+      Alert.alert('Erro', error.message || 'Não foi possível fazer o bichinho dormir.');
+    }
+  };
+
+  const handleUpdateHappiness = async () => {
+    const parsedSteps = parseInt(stepsInput);
+    if (isNaN(parsedSteps) || parsedSteps < 0) {
+      Alert.alert('Erro', 'Por favor, insira um número válido de passos.');
+      return;
+    }
+    try {
+      const updatedPet = await updatePetHappiness(parsedSteps);
+      setPet(updatedPet);
+      setStepsInput(''); // Limpa o input
+      Alert.alert('Sucesso', `Felicidade de ${updatedPet.name} atualizada com ${parsedSteps} passos!`);
+    } catch (error) {
+      Alert.alert('Erro', error.message || 'Não foi possível atualizar a felicidade.');
+    }
+  };
+
+  const getPetImage = (stage) => {
+    switch (stage) {
+      case 'Ovo': return eggImage;
+      case 'Filhote': return babyImage;
+      case 'Adulto': return adultImage;
+      case 'Idoso': return oldImage;
+      default: return eggImage; // Default para ovo
+    }
+  };
+
+  if (loading) {
+    return (
+      <ImageBackground source={BG} style={styles.background}>
+        <View style={styles.container}>
+          <Text style={styles.loadingText}>Carregando bichinho...</Text>
+        </View>
+      </ImageBackground>
+    );
+  }
 
   return (
     <ImageBackground source={BG} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Removido o botão de voltar, pois agora estará em uma aba */}
-        {/* <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>{'< Voltar'}</Text>
-        </TouchableOpacity> */}
+        <Text style={styles.title}>Meu RunGO</Text>
 
-        {!bichinho ? (
-          <View style={styles.selectionContainer}>
-            <Text style={styles.title}>Selecione um Ovo</Text>
-            <Button title="Ovo Comum" onPress={() => selecionarOvo('comum')} />
-            <Button title="Ovo Raro" onPress={() => selecionarOvo('raro')} />
+        {showHatchInput ? (
+          <View style={styles.gameContainer}>
+            <Text style={styles.bichinhoName}>Um ovo misterioso apareceu!</Text>
+            <ImageBackground source={eggImage} style={styles.petImage} resizeMode="contain" />
+            <Text style={styles.label}>Dê um nome ao seu novo amigo:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nome do RunGO"
+              placeholderTextColor="#aaa"
+              value={petName}
+              onChangeText={setPetName}
+            />
+            <Button title="Chocar Ovo!" onPress={handleHatchPet} />
           </View>
         ) : (
-          <View style={styles.gameContainer}>
-            <Text style={styles.bichinhoName}>{bichinho.nome}</Text>
-            <Text style={styles.statusText}>Estágio: {bichinho.estagio}</Text>
-            <Text style={styles.statusText}>Felicidade: {bichinho.felicidade}</Text>
-            <Text style={styles.statusText}>Fome: {bichinho.fome}</Text>
-            <Text style={styles.statusText}>Energia: {bichinho.energia}</Text>
+          pet && (
+            <View style={styles.gameContainer}>
+              <Text style={styles.bichinhoName}>{pet.name}</Text>
+              <ImageBackground source={getPetImage(pet.stage)} style={styles.petImage} resizeMode="contain" />
 
-            <View style={styles.actionsContainer}>
-              <Button
-                title="Alimentar"
-                onPress={() => setBichinho(prev => {
-                  const b = new Bichinho(prev.nome, prev.estagio, prev.felicidade, prev.fome, prev.energia);
-                  b.alimentar();
-                  return b;
-                })}
-              />
-              <Button
-                title="Brincar"
-                onPress={() => setBichinho(prev => {
-                  const b = new Bichinho(prev.nome, prev.estagio, prev.felicidade, prev.fome, prev.energia);
-                  b.brincar();
-                  return b;
-                })}
-              />
-              <Button
-                title="Descansar"
-                onPress={() => setBichinho(prev => {
-                  const b = new Bichinho(prev.nome, prev.estagio, prev.felicidade, prev.fome, prev.energia);
-                  b.descansar();
-                  return b;
-                })}
-              />
+              <View style={styles.statsContainer}>
+                <Text style={styles.statText}>Estágio: {pet.stage}</Text>
+                <Text style={styles.statText}>Felicidade: {pet.happiness}%</Text>
+                <Text style={styles.statText}>Fome: {pet.fome}%</Text>
+                <Text style={styles.statText}>Energia: {pet.energia}%</Text>
+                <Text style={styles.statText}>Passos de Vida: {pet.totalStepsLife}</Text>
+              </View>
+
+              <View style={styles.actionsContainer}>
+                <Button title="Alimentar" onPress={handleFeed} />
+                <Button title="Brincar" onPress={handlePlay} />
+                <Button title="Dormir" onPress={handleSleep} />
+              </View>
+
+              <View style={styles.stepsUpdateContainer}>
+                <Text style={styles.label}>Simular Passos:</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Número de passos"
+                  placeholderTextColor="#aaa"
+                  keyboardType="numeric"
+                  value={stepsInput}
+                  onChangeText={setStepsInput}
+                />
+                <Button title="Atualizar Felicidade por Passos" onPress={handleUpdateHappiness} />
+              </View>
             </View>
-          </View>
+          )
         )}
       </ScrollView>
     </ImageBackground>
@@ -158,17 +199,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.4)', // Overlay escuro para melhorar a legibilidade
+    backgroundColor: 'rgba(0,0,0,0.4)', // Overlay para legibilidade
   },
-  // backButton e backButtonText removidos pois não serão mais necessários com Tab Navigation
-  selectionContainer: {
-    alignItems: 'center',
-    marginTop: 50, // Ajuste para o conteúdo não ficar tão próximo ao topo
+  loadingText: {
+    color: '#FFCB05',
+    fontSize: 24,
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 5,
   },
   title: {
-    fontSize: 32, // Um pouco menor que o título da Home, mas ainda grande
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFCB05', // Amarelo Pokémon
+    color: '#FFCB05',
     marginBottom: 30,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 1, height: 1 },
@@ -177,39 +221,84 @@ const styles = StyleSheet.create({
   },
   gameContainer: {
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: 20, // Ajuste para ficar um pouco mais ao topo
     padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.6)', // Fundo semi-transparente para o container do jogo
+    backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 12,
+    width: '90%', // Ocupa a maior parte da largura
   },
   bichinhoName: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#FFDE00', // Amarelo vibrante do tema
+    color: '#FFDE00',
     marginBottom: 20,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 5,
   },
-  statusText: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    marginBottom: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+  petImage: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statsContainer: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 10,
+    marginBottom: 20,
+    borderColor: '#3D7DCA',
+    borderWidth: 1,
+  },
+  statText: {
+    color: '#FFF',
+    fontSize: 18,
+    marginBottom: 5,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadowRadius: 3,
   },
   actionsContainer: {
-    flexDirection: 'column', // Coloquei em coluna para melhor layout com os botões customizados
-    marginTop: 30,
-    width: '80%', // Largura dos botões
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    width: '100%',
+    marginBottom: 20,
   },
-  // O componente 'Button' já tem seus próprios estilos, então actionButton não é mais necessário aqui
+  // Estilos para o input de passos
+  stepsUpdateContainer: {
+    width: '100%',
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  label: {
+    color: '#FFF',
+    fontSize: 16,
+    marginBottom: 10,
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  input: {
+    width: '90%',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+    color: '#fff',
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#3D7DCA',
+    textAlign: 'center',
+  },
 });
 
 export default BichinhoGameScreen;
