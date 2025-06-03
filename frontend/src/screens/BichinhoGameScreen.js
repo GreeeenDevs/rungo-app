@@ -1,47 +1,89 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, ImageBackground, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, ImageBackground, TextInput, TouchableOpacity, Image } from 'react-native';
 import Button from '../components/Button';
 import BG from '../../assets/bgscream.gif';
 import { getPetStatus, hatchPet, feedPet, playWithPet, sleepPet, updatePetHappiness } from '../services/apiService';
-import { useFocusEffect } from '@react-navigation/native'; // Para recarregar dados ao focar na tela
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Importe AsyncStorage
 
 // Imagens dos estágios (ajuste os caminhos conforme seus assets)
-import eggImage from '../../assets/egg.gif'; // Exemplo
-import babyImage from '../../assets/baby.gif'; // Exemplo
-import adultImage from '../../assets/adult.gif'; // Exemplo
-import oldImage from '../../assets/old.gif'; // Exemplo
+import eggImage from '../../assets/egg.gif';
+import babyImage from '../../assets/baby.gif';
+import adultImage from '../../assets/adult.gif';
+import oldImage from '../../assets/old.gif';
+
+// Importar as imagens dos dinossauros (as mesmas da ShopScreen)
+import dinoAzul from '../../assets/dinosaurs/dino_azul.gif';
+import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.gif';
+import dinoVerde from '../../assets/dinosaurs/dino_verde.gif';
+import dinoRoxo from '../../assets//dinosaurs/dino_roxo.gif';
+import dinoRosa from '../../assets/dinosaurs/dino_rosa.gif';
+import dinoBranco from '../../assets/dinosaurs/dino_branco.gif';
+import dinoPreto from '../../assets/dinosaurs/dino_preto.gif';
+import dinoAmarelo from '../../assets/dinosaurs/dino_amarelo.gif';
+
+// Mapeamento para obter a imagem do dinossauro pelo ID (para usar o dinossauro chocado)
+const dinosaurImages = {
+  dino_azul: dinoAzul,
+  dino_vermelho: dinoVermelho,
+  dino_verde: dinoVerde,
+  dino_roxo: dinoRoxo,
+  dino_rosa: dinoRosa,
+  dino_branco: dinoBranco,
+  dino_preto: dinoPreto,
+  dino_amarelo: dinoAmarelo,
+};
+
 
 const BichinhoGameScreen = () => {
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [petName, setPetName] = useState('');
-  const [showHatchInput, setShowHatchInput] = useState(false); // Novo estado para controlar a visibilidade do input
+  const [showHatchInput, setShowHatchInput] = useState(false);
   const [stepsInput, setStepsInput] = useState('');
-
+  const [dinossauroChocadoPeloGacha, setDinossauroChocadoPeloGacha] = useState(null); // Novo estado
 
   const fetchPetStatus = useCallback(async () => {
     setLoading(true);
     try {
       const petData = await getPetStatus();
       setPet(petData);
-      setShowHatchInput(false); // Esconde o input de chocar se o pet for encontrado
+      setShowHatchInput(false);
+
+      // Limpa qualquer ovo chocado anterior se já houver um pet ativo
+      if (petData) {
+        await AsyncStorage.removeItem('novoDinossauroChocado');
+        setDinossauroChocadoPeloGacha(null);
+      }
+
     } catch (error) {
       console.error("Erro ao buscar status do pet:", error);
       if (error.message.includes('Bichinho não encontrado') || error.message.includes('404')) {
         setPet(null); // Define pet como null para indicar que não há pet chocado
-        setShowHatchInput(true); // Mostra o input para chocar o ovo
+
+        // Verifica se há um novo dinossauro chocado do gacha
+        const novoDinoJson = await AsyncStorage.getItem('novoDinossauroChocado');
+        if (novoDinoJson) {
+          const novoDino = JSON.parse(novoDinoJson);
+          setDinossauroChocadoPeloGacha(novoDino);
+          setShowHatchInput(true); // Mostra o input para chocar este ovo
+        } else {
+          setShowHatchInput(true); // Mostra o input para chocar um ovo padrão se não houver um do gacha
+        }
       }
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useFocusEffect( // Recarrega sempre que a tela for focada
+  useFocusEffect(
     useCallback(() => {
       fetchPetStatus();
       const interval = setInterval(() => {
-        fetchPetStatus(); // Recarrega o estado do pet a cada X segundos para refletir decadência
-      }, 60 * 1000); // A cada 1 minuto (ajuste conforme a necessidade da decadência)
+        // Você pode ajustar a lógica aqui para só buscar se a tela estiver visível
+        // Ou mover a decadência para o backend ou para um Context global
+        fetchPetStatus();
+      }, 60 * 1000);
 
       return () => clearInterval(interval);
     }, [fetchPetStatus])
@@ -53,14 +95,22 @@ const BichinhoGameScreen = () => {
       Alert.alert('Erro', 'Por favor, dê um nome ao seu bichinho!');
       return;
     }
+
+    let dinoIdToHatch = 'default_egg'; // Ovo padrão
+    if (dinossauroChocadoPeloGacha) {
+      dinoIdToHatch = dinossauroChocadoPeloGacha.id; // Usa o ID do dino chocado pelo gacha
+    }
+
     try {
-      const hatchedPet = await hatchPet(petName);
+      const hatchedPet = await hatchPet(petName, dinoIdToHatch); // Passa o ID do dinossauro para a API
       setPet(hatchedPet);
-      Alert.alert('Sucesso', `Parabéns! Seu bichinho ${hatchedPet.name} nasceu!`);
+      Alert.alert('Sucesso', `Parabéns! Seu bichinho ${hatchedPet.name} (${dinossauroChocadoPeloGacha?.nome || 'ovo padrão'}) nasceu!`);
       setShowHatchInput(false);
+      setDinossauroChocadoPeloGacha(null); // Limpa o estado
+      await AsyncStorage.removeItem('novoDinossauroChocado'); // Limpa do storage
     } catch (error) {
       console.error("Erro ao chocar pet:", error);
-      Alert.alert('Erro', 'Não foi possível chocar o bichinho.');
+      Alert.alert('Erro', error.message || 'Não foi possível chocar o bichinho.');
     }
   };
 
@@ -110,13 +160,18 @@ const BichinhoGameScreen = () => {
     }
   };
 
-  const getPetImage = (stage) => {
+  const getPetImage = (stage, dinossauroId = null) => {
+    if (dinossauroId && dinosaurImages[dinossauroId]) {
+      // Se tiver um ID de dinossauro chocado, usa a imagem do dinossauro
+      return dinosaurImages[dinossauroId];
+    }
+    // Caso contrário, usa as imagens de estágio padrão ou um ovo genérico
     switch (stage) {
       case 'Ovo': return eggImage;
       case 'Filhote': return babyImage;
       case 'Adulto': return adultImage;
       case 'Idoso': return oldImage;
-      default: return eggImage; // Default para ovo
+      default: return eggImage;
     }
   };
 
@@ -137,8 +192,14 @@ const BichinhoGameScreen = () => {
 
         {showHatchInput ? (
           <View style={styles.gameContainer}>
-            <Text style={styles.bichinhoName}>Um ovo misterioso apareceu!</Text>
-            <ImageBackground source={eggImage} style={styles.petImage} resizeMode="contain" />
+            <Text style={styles.bichinhoName}>
+              {dinossauroChocadoPeloGacha ? `Um ${dinossauroChocadoPeloGacha.nome} apareceu!` : 'Um ovo misterioso apareceu!'}
+            </Text>
+            <Image
+              source={dinossauroChocadoPeloGacha ? dinossauroChocadoPeloGacha.imagem : eggImage}
+              style={styles.petImage}
+              resizeMode="contain"
+            />
             <Text style={styles.label}>Dê um nome ao seu novo amigo:</Text>
             <TextInput
               style={styles.input}
@@ -153,7 +214,8 @@ const BichinhoGameScreen = () => {
           pet && (
             <View style={styles.gameContainer}>
               <Text style={styles.bichinhoName}>{pet.name}</Text>
-              <ImageBackground source={getPetImage(pet.stage)} style={styles.petImage} resizeMode="contain" />
+              {/* Agora passa o ID do dinossauro, se existir no pet */}
+              <Image source={getPetImage(pet.stage, pet.dinosaurId)} style={styles.petImage} resizeMode="contain" />
 
               <View style={styles.statsContainer}>
                 <Text style={styles.statText}>Estágio: {pet.stage}</Text>
@@ -199,7 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.4)', // Overlay para legibilidade
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   loadingText: {
     color: '#FFCB05',
@@ -221,7 +283,7 @@ const styles = StyleSheet.create({
   },
   gameContainer: {
     alignItems: 'center',
-    marginTop: 20, // Ajuste para ficar um pouco mais ao topo
+    marginTop: 20,
     padding: 20,
     backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 15,
@@ -230,7 +292,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 12,
-    width: '90%', // Ocupa a maior parte da largura
+    width: '90%',
   },
   bichinhoName: {
     fontSize: 36,
@@ -272,7 +334,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 20,
   },
-  // Estilos para o input de passos
   stepsUpdateContainer: {
     width: '100%',
     marginTop: 20,

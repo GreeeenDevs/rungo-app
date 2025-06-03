@@ -1,54 +1,112 @@
-import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, ScrollView, TouchableOpacity, Alert } from 'react-native';
-// Certifique-se de que o componente Button esteja em '../components/Button'
+// src/screens/ShopScreen.js
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ImageBackground, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
 import Button from '../components/Button';
-import BG from '../../assets/bgscream.gif'
+import BG from '../../assets/bgscream.gif';
 
+// Importar as imagens dos dinossauros
+// VOCÊ PRECISA TER ESSAS IMAGENS NA PASTA assets/dinosaurs/ (ou ajuste o caminho)
+import dinoAzul from '../../assets/dinosaurs/dino_azul.gif';   // Crie essas pastas e adicione as imagens
+import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.gif';
+import dinoVerde from '../../assets/dinosaurs/dino_verde.gif';
+import dinoRoxo from '../../assets/dinosaurs/dino_roxo.gif';
+import dinoRosa from '../../assets/dinosaurs/dino_rosa.gif';
+import dinoBranco from '../../assets/dinosaurs/dino_branco.gif';
+import dinoPreto from '../../assets/dinosaurs/dino_preto.gif';
+import dinoAmarelo from '../../assets/dinosaurs/dino_amarelo.gif';
+import eggImage from '../../assets/egg.gif'; // Imagem de um ovo genérico
 
-const OvosDisponiveis = [
-  { id: 'comum', tipo: 'Comum', descricao: 'Um ovo simples e leal.', preco: 100 },
-  { id: 'raro', tipo: 'Raro', descricao: 'Um ovo com potencial oculto.', preco: 500 },
-  { id: 'lendario', tipo: 'Lendário', descricao: 'Um ovo misterioso, lendas o cercam.', preco: 2000 },
+const custoGacha = 100; // Custo para chocar um ovo
+
+const DinossaurosComuns = [
+  { id: 'dino_azul', nome: 'Dinossauro Azul', imagem: dinoAzul },
+  { id: 'dino_vermelho', nome: 'Dinossauro Vermelho', imagem: dinoVermelho },
+  { id: 'dino_verde', nome: 'Dinossauro Verde', imagem: dinoVerde },
+  { id: 'dino_roxo', nome: 'Dinossauro Roxo', imagem: dinoRoxo },
 ];
 
-const ShopScreen = ({ navigation }) => { // Removido 'route' por enquanto
-  // A função para selecionar o ovo não será passada via route.params diretamente aqui,
-  // pois estamos na tela da aba. O gerenciamento do ovo escolhido precisará ser feito de outra forma (ex: context API, Redux)
-  // ou a loja poderia estar em uma stack separada navegando de BichinhoGameScreen.
+const DinossaurosRaros = [
+  { id: 'dino_rosa', nome: 'Dinossauro Rosa', imagem: dinoRosa },
+  { id: 'dino_branco', nome: 'Dinossauro Branco', imagem: dinoBranco },
+  { id: 'dino_preto', nome: 'Dinossauro Preto', imagem: dinoPreto },
+  { id: 'dino_amarelo', nome: 'Dinossauro Amarelo', imagem: dinoAmarelo },
+];
 
-  const handleComprarOvo = (ovoTipo) => {
-    // Por enquanto, apenas um alerta de que o ovo foi 'comprado'.
-    // A lógica real de "dar o ovo para o bichinho" viria aqui ou em um gerenciamento de estado global.
-    Alert.alert(
-      'Compra de Ovo',
-      `Você comprou o Ovo ${ovoTipo}!`,
-      [
-        { text: 'OK', onPress: () => console.log(`Ovo ${ovoTipo} comprado.`) },
-      ],
-      { cancelable: false }
-    );
+const ShopScreen = ({ navigation }) => {
+  const [moedas, setMoedas] = useState(500); // Moedas iniciais do jogador
+  const [ultimoDinossauroChocado, setUltimoDinossauroChocado] = useState(null); // Para exibir o resultado
 
-    // Se você quisesse navegar para a tela do bichinho após a compra e passar o ovo:
-    // navigation.navigate('MainTabs', { screen: 'Meu Bichinho', params: { novoOvoTipo: ovoTipo } });
-    // Isso exigiria que 'Meu Bichinho' (BichinhoGameScreen) soubesse como receber esse parâmetro.
+  const handleChocarOvo = () => {
+    if (moedas < custoGacha) {
+      Alert.alert('Saldo Insuficiente', 'Você não tem moedas suficientes para chocar um ovo!');
+      return;
+    }
+
+    setMoedas(prevMoedas => prevMoedas - custoGacha); // Deduz o custo
+
+    const probabilidadeRaro = 0.3; // 30% de chance de vir raro
+    const isRaro = Math.random() < probabilidadeRaro;
+
+    let dinossauroChocado;
+    if (isRaro) {
+      dinossauroChocado = DinossaurosRaros[Math.floor(Math.random() * DinossaurosRaros.length)];
+      Alert.alert('Parabéns!', `Você chocou um DINOSSAURO RARO: ${dinossauroChocado.nome}!`);
+    } else {
+      dinossauroChocado = DinossaurosComuns[Math.floor(Math.random() * DinossaurosComuns.length)];
+      Alert.alert('Bom!', `Você chocou um DINOSSAURO COMUM: ${dinossauroChocado.nome}.`);
+    }
+
+    setUltimoDinossauroChocado(dinossauroChocado);
+
+    // TODO: Aqui você precisaria implementar a lógica para "adicionar"
+    // este dinossauro à coleção do usuário ou associá-lo ao pet existente.
+    // Isso pode ser feito via Context API, Redux ou chamadas à sua API de backend.
+    console.log(`Dinossauro chocado: ${dinossauroChocado.nome}`);
   };
 
   return (
     <ImageBackground source={BG} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Loja de Ovos</Text>
-        <Text style={styles.subtitle}>Escolha seu próximo companheiro!</Text>
+        <Text style={styles.title}>Loja de Ovos - Gacha</Text>
+        <Text style={styles.subtitle}>Sua Moedas: ${moedas}</Text>
 
-        <View style={styles.ovosContainer}>
-          {OvosDisponiveis.map((ovo) => (
-            <View key={ovo.id} style={styles.ovoItem}>
-              <Text style={styles.ovoTipo}>{ovo.tipo}</Text>
-              <Text style={styles.ovoDescricao}>{ovo.descricao}</Text>
-              <Text style={styles.ovoPreco}>Preço: ${ovo.preco}</Text>
-              <Button title={`Comprar ${ovo.tipo}`} onPress={() => handleComprarOvo(ovo.tipo)} />
-            </View>
-          ))}
+        <View style={styles.gachaContainer}>
+          <Text style={styles.gachaInfo}>Custo por Ovo: ${custoGacha}</Text>
+          <Text style={styles.gachaProb}>Chance de Raro: 30%</Text>
+          <Image source={eggImage} style={styles.gachaEggImage} />
+          <Button title="Chocar Ovo!" onPress={handleChocarOvo} />
         </View>
+
+        {ultimoDinossauroChocado && (
+          <View style={styles.resultadoContainer}>
+            <Text style={styles.resultadoTitle}>Você Chocou:</Text>
+            <Image source={ultimoDinossauroChocado.imagem} style={styles.resultadoDinoImage} resizeMode="contain" />
+            <Text style={styles.resultadoDinoNome}>{ultimoDinossauroChocado.nome}</Text>
+            <Text style={styles.resultadoDinoTipo}>{ultimoDinossauroChocado.id.includes('raro') ? 'Tipo: Raro' : 'Tipo: Comum'}</Text>
+          </View>
+        )}
+
+        <View style={styles.dinoListContainer}>
+            <Text style={styles.listTitle}>Dinossauros Comuns Possíveis:</Text>
+            <View style={styles.dinoGrid}>
+                {DinossaurosComuns.map(dino => (
+                    <View key={dino.id} style={styles.dinoGridItem}>
+                        <Image source={dino.imagem} style={styles.dinoGridImage} />
+                        <Text style={styles.dinoGridText}>{dino.nome.replace('Dinossauro ', '')}</Text>
+                    </View>
+                ))}
+            </View>
+            <Text style={[styles.listTitle, { marginTop: 20 }]}>Dinossauros Raros Possíveis:</Text>
+            <View style={styles.dinoGrid}>
+                {DinossaurosRaros.map(dino => (
+                    <View key={dino.id} style={styles.dinoGridItem}>
+                        <Image source={dino.imagem} style={styles.dinoGridImage} />
+                        <Text style={styles.dinoGridText}>{dino.nome.replace('Dinossauro ', '')}</Text>
+                    </View>
+                ))}
+            </View>
+        </View>
+
       </ScrollView>
     </ImageBackground>
   );
@@ -64,12 +122,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.6)', // Fundo mais escuro para o conteúdo
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
   title: {
     fontSize: 38,
     fontWeight: 'bold',
-    color: '#FFCB05', // Amarelo Pokémon
+    color: '#FFCB05',
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
@@ -77,55 +135,115 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 20,
-    color: '#FFFFFF',
+    fontSize: 24, // Aumentado para moedas
+    color: '#FFF',
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 8,
     marginBottom: 40,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
-  ovosContainer: {
-    width: '90%', // Limita a largura para centralizar o conteúdo
+  gachaContainer: {
+    backgroundColor: 'rgba(44, 62, 80, 0.8)',
+    padding: 25,
+    borderRadius: 15,
     alignItems: 'center',
-  },
-  ovoItem: {
-    backgroundColor: 'rgba(44, 62, 80, 0.8)', // Fundo para cada item de ovo
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
-    width: '100%',
-    alignItems: 'center',
+    marginBottom: 30,
+    width: '90%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 8,
-    borderWidth: 1,
-    borderColor: '#3D7DCA', // Borda azul
+    borderWidth: 2,
+    borderColor: '#3D7DCA',
   },
-  ovoTipo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFDE00', // Amarelo vibrante
-    marginBottom: 5,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  },
-  ovoDescricao: {
-    fontSize: 16,
-    color: '#ECF0F1', // Branco acinzentado
+  gachaInfo: {
+    fontSize: 20,
+    color: '#FFF',
     marginBottom: 10,
-    textAlign: 'center',
-  },
-  ovoPreco: {
-    fontSize: 18,
     fontWeight: 'bold',
-    color: '#2ECC71', // Verde para o preço
+  },
+  gachaProb: {
+    fontSize: 18,
+    color: '#FFF',
+    marginBottom: 20,
+  },
+  gachaEggImage: {
+    width: 150,
+    height: 150,
+    resizeMode: 'contain',
+    marginBottom: 20,
+  },
+  resultadoContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 20,
+    borderRadius: 15,
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '90%',
+    borderWidth: 1,
+    borderColor: '#FFDE00',
+  },
+  resultadoTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FFDE00',
     marginBottom: 15,
   },
-  // O estilo do Button é importado de '../components/Button'
+  resultadoDinoImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 10,
+  },
+  resultadoDinoNome: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFF',
+    marginBottom: 5,
+  },
+  resultadoDinoTipo: {
+    fontSize: 16,
+    color: '#CCC',
+  },
+  dinoListContainer: {
+    width: '90%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#555',
+  },
+  listTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFCB05',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  dinoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  dinoGridItem: {
+    alignItems: 'center',
+    margin: 10,
+    width: 80, // Tamanho fixo para a célula da grade
+  },
+  dinoGridImage: {
+    width: 60,
+    height: 60,
+    resizeMode: 'contain',
+    marginBottom: 5,
+  },
+  dinoGridText: {
+    fontSize: 12,
+    color: '#FFF',
+    textAlign: 'center',
+  },
 });
 
 export default ShopScreen;

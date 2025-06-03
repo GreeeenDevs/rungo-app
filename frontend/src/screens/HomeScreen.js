@@ -1,10 +1,11 @@
+// src/screens/HomeScreen.js
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView } from 'react-native';
 import Button from '../components/Button'; // Importa o componente de botão
 import BG from '../../assets/bgscream.gif'
 
 
-const HomeScreen = ({ navigation }) => { // Navigation ainda é útil se você tiver fluxos internos da Home para Stack Navigator
+const HomeScreen = ({ navigation }) => { // Navigation é crucial para navegar
   return (
     <ImageBackground source={BG} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -12,9 +13,8 @@ const HomeScreen = ({ navigation }) => { // Navigation ainda é útil se você t
         <Text style={styles.subtitle}>Sua jornada começa agora!</Text>
 
         <View style={styles.buttonContainer}>
-          {/* Este botão pode ser para iniciar uma partida TCG real ou outra funcionalidade */}
-          <Button title="LOJA" onPress={() => alert('escolha seu primeiro ovo')} />
-          {/* Os botões de Coleção, Loja, Opções foram removidos, pois agora são abas */}
+          {/* Agora o botão LOJA navega para a ShopScreen */}
+          <Button title="LOJA DE OVOS" onPress={() => navigation.navigate('Loja')} /> {/* 'Loja' é o nome da rota da aba */}
         </View>
 
       </ScrollView>
