@@ -1,23 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, ImageBackground, TextInput, TouchableOpacity, Image } from 'react-native';
 import Button from '../components/Button';
-import BG from '../../assets/bgscream.gif';
+import BG from '../../assets/bgscream';
 import { getPetStatus, hatchPet, feedPet, playWithPet, sleepPet, updatePetHappiness } from '../services/apiService';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Importe AsyncStorage
 
 // Imagens dos estágios (ajuste os caminhos conforme seus assets)
-import eggImage from '../../assets/egg.gif';
-import babyImage from '../../assets/baby.gif';
-import adultImage from '../../assets/adult.gif';
-import oldImage from '../../assets/old.gif';
+import eggImage from '../../assets/egg';
+import babyImage from '../../assets/baby';
+import adultImage from '../../assets/adult';
+import oldImage from '../../assets/old';
 
 // Importar as imagens dos dinossauros (as mesmas da ShopScreen)
-import dinoAzul from '../../assets/dinosaurs/dino_azul.gif';
-import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.gif';
-import dinoRosa from '../../assets/dinosaurs/dino_rosa.gif';
-import dinoBranco from '../../assets/dinosaurs/dino_branco.gif';
-import dinoPreto from '../../assets/dinosaurs/dino_preto.gif';
+import dinoAzul from '../../assets/dinosaurs/dino_azul';
+import dinoVermelho from '../../assets/dinosaurs/dino_vermelho';
+import dinoRosa from '../../assets/dinosaurs/dino_rosa'; //tirei os gif//
+import dinoBranco from '../../assets/dinosaurs/dino_branco';
+import dinoPreto from '../../assets/dinosaurs/dino_preto';
 
 // Mapeamento para obter a imagem do dinossauro pelo ID (para usar o dinossauro chocado)
 const dinosaurImages = {

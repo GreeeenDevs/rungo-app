@@ -6,11 +6,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { getCollectedDinos } from '../services/apiService'; // Importe a nova função
 
 // Importar as imagens dos dinossauros (as mesmas da ShopScreen e BichinhoGameScreen)
-import dinoAzul from '../../assets/dinosaurs/dino_azul.gif';
-import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.gif';
-import dinoRosa from '../../assets/dinosaurs/dino_rosa.gif';
-import dinoBranco from '../../assets/dinosaurs/dino_branco.gif';
-import dinoPreto from '../../assets/dinosaurs/dino_preto.gif';
+import dinoAzul from '../../assets/dinosaurs/dino_azul';
+import dinoVermelho from '../../assets/dinosaurs/dino_vermelho';
+import dinoRosa from '../../assets/dinosaurs/dino_rosa';
+import dinoBranco from '../../assets/dinosaurs/dino_branco';
+import dinoPreto from '../../assets/dinosaurs/dino_preto';
 
 
 // Mapeamento para obter a imagem do dinossauro pelo ID
