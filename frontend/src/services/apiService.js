@@ -51,6 +51,162 @@ const apiCall = async (endpoint, method = 'GET', data = null) => {
   }
 };
 
+const getAuthToken = async () => {
+  return await AsyncStorage.getItem('userToken');
+};
+
+const getPetStatus = async () => {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Usuário não autenticado.');
+
+  const response = await fetch(`${API_BASE_URL}/api/pet`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 404) {
+    throw new Error('Bichinho não encontrado. Crie um novo!');
+  }
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erro ao buscar status do pet.');
+  }
+  return response.json();
+};
+const hatchPet = async (name, dinosaurId = 'default_egg') => {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Usuário não autenticado.');
+
+  const response = await fetch(`${API_BASE_URL}/api/pet/hatch`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ name, dinosaurId }), // Envia o dinosaurId
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erro ao chocar o bichinho.');
+  }
+  return response.json();
+};
+
+const feedPet = async () => {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Usuário não autenticado.');
+
+  const response = await fetch(`${API_BASE_URL}/api/pet/feed`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erro ao alimentar o bichinho.');
+  }
+  return response.json();
+};
+
+const playWithPet = async () => {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Usuário não autenticado.');
+
+  const response = await fetch(`${API_BASE_URL}/api/pet/play`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erro ao brincar com o bichinho.');
+  }
+  return response.json();
+};
+
+const sleepPet = async () => {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Usuário não autenticado.');
+
+  const response = await fetch(`${API_BASE_URL}/api/pet/sleep`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erro ao fazer o bichinho dormir.');
+  }
+  return response.json();
+};
+
+const updatePetHappiness = async (steps) => {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Usuário não autenticado.');
+
+  const response = await fetch(`${API_BASE_URL}/api/pet/update-happiness`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ steps }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erro ao atualizar felicidade do bichinho.');
+  }
+  return response.json();
+};
+// NOVA FUNÇÃO: Para registrar um pet como colecionado
+const archivePet = async (petId) => {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Usuário não autenticado.');
+
+  const response = await fetch(`${API_BASE_URL}/api/pet/archive/${petId}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erro ao arquivar o bichinho para coleção.');
+  }
+  return response.json(); // Retorna o pet arquivado ou uma confirmação
+};
+
+// NOVA FUNÇÃO: Para obter os dinossauros colecionados
+const getCollectedDinos = async () => {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Usuário não autenticado.');
+
+  const response = await fetch(`${API_BASE_URL}/api/collection`, { // Nova rota para a coleção
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Erro ao buscar coleção de dinossauros.');
+  }
+  return response.json(); // Retorna a lista de dinossauros colecionados
+};
+
+
+
+
 // --- Funções de Autenticação ---
 export const loginUser = async (username, password) => {
   return apiCall('/auth/login', 'POST', { username, password });
@@ -83,4 +239,15 @@ export const sleepPet = async () => {
 
 export const updatePetHappiness = async (steps) => {
   return apiCall('/api/pet/updateHappiness', 'POST', { steps });
+};
+
+export {
+  getPetStatus,
+  hatchPet,
+  feedPet,
+  playWithPet,
+  sleepPet,
+  updatePetHappiness,
+  archivePet, 
+  getCollectedDinos 
 };

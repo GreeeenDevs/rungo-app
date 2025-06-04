@@ -15,23 +15,17 @@ import oldImage from '../../assets/old.gif';
 // Importar as imagens dos dinossauros (as mesmas da ShopScreen)
 import dinoAzul from '../../assets/dinosaurs/dino_azul.gif';
 import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.gif';
-import dinoVerde from '../../assets/dinosaurs/dino_verde.gif';
-import dinoRoxo from '../../assets//dinosaurs/dino_roxo.gif';
 import dinoRosa from '../../assets/dinosaurs/dino_rosa.gif';
 import dinoBranco from '../../assets/dinosaurs/dino_branco.gif';
 import dinoPreto from '../../assets/dinosaurs/dino_preto.gif';
-import dinoAmarelo from '../../assets/dinosaurs/dino_amarelo.gif';
 
 // Mapeamento para obter a imagem do dinossauro pelo ID (para usar o dinossauro chocado)
 const dinosaurImages = {
   dino_azul: dinoAzul,
   dino_vermelho: dinoVermelho,
-  dino_verde: dinoVerde,
-  dino_roxo: dinoRoxo,
   dino_rosa: dinoRosa,
   dino_branco: dinoBranco,
   dino_preto: dinoPreto,
-  dino_amarelo: dinoAmarelo,
 };
 
 
@@ -55,6 +49,26 @@ const BichinhoGameScreen = () => {
         await AsyncStorage.removeItem('novoDinossauroChocado');
         setDinossauroChocadoPeloGacha(null);
       }
+      // NOVO: Verifica se o pet está no estágio "Idoso"
+        if (petData.stage === 'Idoso') {
+          Alert.alert(
+            'Parabéns!',
+            `${petData.name} atingiu a velhice! Ele foi adicionado à sua coleção. Agora você pode chocar um novo bichinho!`,
+            [
+              { text: 'OK', onPress: async () => {
+                try {
+                  await archivePet(petData._id); // Chama a API para arquivar
+                  setPet(null); // Remove o pet atual
+                  setShowHatchInput(true); // Mostra o input para chocar um novo ovo
+                } catch (error) {
+                  console.error("Erro ao arquivar pet:", error);
+                  Alert.alert('Erro', 'Não foi possível arquivar o bichinho. Tente novamente.');
+                }
+              }}
+            ]
+          );
+        }
+      
 
     } catch (error) {
       console.error("Erro ao buscar status do pet:", error);

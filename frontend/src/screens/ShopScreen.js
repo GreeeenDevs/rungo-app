@@ -8,12 +8,9 @@ import BG from '../../assets/bgscream.gif';
 // VOCÊ PRECISA TER ESSAS IMAGENS NA PASTA assets/dinosaurs/ (ou ajuste o caminho)
 import dinoAzul from '../../assets/dinosaurs/dino_azul.gif';   // Crie essas pastas e adicione as imagens
 import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.gif';
-import dinoVerde from '../../assets/dinosaurs/dino_verde.gif';
-import dinoRoxo from '../../assets/dinosaurs/dino_roxo.gif';
 import dinoRosa from '../../assets/dinosaurs/dino_rosa.gif';
 import dinoBranco from '../../assets/dinosaurs/dino_branco.gif';
 import dinoPreto from '../../assets/dinosaurs/dino_preto.gif';
-import dinoAmarelo from '../../assets/dinosaurs/dino_amarelo.gif';
 import eggImage from '../../assets/egg.gif'; // Imagem de um ovo genérico
 
 const custoGacha = 100; // Custo para chocar um ovo
@@ -21,15 +18,12 @@ const custoGacha = 100; // Custo para chocar um ovo
 const DinossaurosComuns = [
   { id: 'dino_azul', nome: 'Dinossauro Azul', imagem: dinoAzul },
   { id: 'dino_vermelho', nome: 'Dinossauro Vermelho', imagem: dinoVermelho },
-  { id: 'dino_verde', nome: 'Dinossauro Verde', imagem: dinoVerde },
-  { id: 'dino_roxo', nome: 'Dinossauro Roxo', imagem: dinoRoxo },
+  { id: 'dino_rosa', nome: 'Dinossauro Rosa', imagem: dinoRosa },
 ];
 
 const DinossaurosRaros = [
-  { id: 'dino_rosa', nome: 'Dinossauro Rosa', imagem: dinoRosa },
   { id: 'dino_branco', nome: 'Dinossauro Branco', imagem: dinoBranco },
   { id: 'dino_preto', nome: 'Dinossauro Preto', imagem: dinoPreto },
-  { id: 'dino_amarelo', nome: 'Dinossauro Amarelo', imagem: dinoAmarelo },
 ];
 
 const ShopScreen = ({ navigation }) => {

@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/firebase-admin-config'); // Importa 'db' do Firestore
+const Pet = require('../models/Pet')
+const CollectedPet = require ('../models/CollectedPets')
 
 const PETS_COLLECTION = 'pets';
 
@@ -277,4 +279,81 @@ router.post('/sleep', async (req, res) => {
     }
 });
 
+router.post('/hatch', auth, async (req, res) => {
+  const { name, dinosaurId } = req.body; // Recebe o dinosaurId
+  const userId = req.user.id; // Supondo que seu middleware auth adiciona user.id
+
+  try {
+    let pet = await Pet.findOne({ userId });
+
+    if (pet) {
+      return res.status(400).json({ message: 'Você já tem um bichinho chocado!' });
+    }
+
+    pet = new Pet({
+      userId,
+      name,
+      dinosaurId, // Salva o dinosaurId
+      stage: 'Filhote', // Começa como filhote após chocar
+      happiness: 100,
+      fome: 100,
+      energia: 100,
+      totalStepsLife: 0,
+    });
+
+    await pet.save();
+    res.status(201).json(pet);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Erro no servidor');
+  }
+});
+
+router.post('/archive/:petId', auth, async (req, res) => {
+  try {
+    const { petId } = req.params;
+    const userId = req.user.id;
+
+    const pet = await Pet.findOne({ _id: petId, userId });
+
+    if (!pet) {
+      return res.status(404).json({ message: 'Bichinho não encontrado ou não pertence ao usuário.' });
+    }
+
+    // Verifica se o pet já está no estágio idoso antes de arquivar
+    if (pet.stage !== 'Idoso') {
+        return res.status(400).json({ message: 'Bichinho ainda não atingiu o estágio idoso para ser colecionado.' });
+    }
+
+    // Cria um registro na coleção de pets coletados
+    const collectedPet = new CollectedPet({
+      userId: userId,
+      petId: pet._id,
+      name: pet.name,
+      dinosaurId: pet.dinosaurId,
+      // Você pode copiar outros atributos importantes aqui se quiser
+    });
+    await collectedPet.save();
+
+    // Opcional: Remover o pet ativo do usuário ou marcá-lo como inativo
+    await Pet.deleteOne({ _id: petId }); // Exemplo: Deleta o pet ativo
+
+    res.status(200).json({ message: 'Bichinho arquivado com sucesso para sua coleção!', collectedPet });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Erro no servidor ao arquivar bichinho.');
+  }
+});
+
+router.get('/collection', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const collectedDinos = await CollectedPet.find({ userId }); // Busca todos os pets colecionados pelo usuário
+
+    res.status(200).json(collectedDinos);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Erro no servidor ao buscar coleção.');
+  }
+});
 module.exports = router;
