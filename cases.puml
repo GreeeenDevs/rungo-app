@@ -1,0 +1,51 @@
+@startuml
+left to right direction
+skinparam actorStyle awesome
+
+actor "Usuário" as User
+
+rectangle "RunGo App" {
+  User -- (Registrar Conta)
+  User -- (Fazer Login)
+  User -- (Recuperar Senha)
+  User -- (Fazer Logout)
+  
+  (Registrar Conta) ..> (Receber Email de Confirmação) : <<include>>
+  (Fazer Login) ..> (Verificar Credenciais) : <<include>>
+  (Fazer Login) ..> (Tratar Erro de Login) : <<extend>>
+  (Recuperar Senha) ..> (Receber Email de Recuperação) : <<include>>
+  
+  User -- (Chocar Ovo)
+  (Chocar Ovo) ..> (Selecionar Ovo) : <<include>>
+  (Chocar Ovo) ..> (Definir Nome do Pet) : <<include>>
+  
+  User -- (Visualizar Status do Pet)
+  (Visualizar Status do Pet) ..> (Ver Felicidade) : <<include>>
+  (Visualizar Status do Pet) ..> (Ver Fome) : <<include>>
+  (Visualizar Status do Pet) ..> (Ver Energia) : <<include>>
+  (Visualizar Status do Pet) ..> (Ver Progresso de Evolução) : <<include>>
+  
+  User -- (Alimentar Pet)
+  (Alimentar Pet) ..> (Atualizar Fome) : <<include>>
+  (Alimentar Pet) ..> (Atualizar Felicidade) : <<include>>
+  
+  User -- (Brincar com Pet)
+  (Brincar com Pet) ..> (Atualizar Felicidade) : <<include>>
+  (Brincar com Pet) ..> (Consumir Energia) : <<include>>
+  
+  User -- (Colocar Pet para Dormir)
+  (Colocar Pet para Dormir) ..> (Recuperar Energia) : <<include>>
+  
+  User -- (Comprar Ovo)
+  (Comprar Ovo) ..> (Visualizar Loja) : <<include>>
+  (Comprar Ovo) ..> (Selecionar Ovo) : <<include>>
+  (Comprar Ovo) ..> (Confirmar Compra) : <<include>>
+  (Comprar Ovo) ..> (Ver Saldo Atualizado) : <<include>>
+  
+  User -- (Visualizar Coleção)
+  (Visualizar Coleção) ..> (Ver Lista de Pets Coletados) : <<include>>
+  (Visualizar Coleção) ..> (Visualizar Detalhes do Pet) : <<include>>
+
+}
+
+@enduml

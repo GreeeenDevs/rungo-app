@@ -1,0 +1,65 @@
+@startuml
+!pragma layout smetana
+
+title Arquitetura de Alto Nível - RunGo App
+
+' Frontend Mobile
+package "Frontend\n(React Native)" {
+  [App]
+  [Navigation]
+  [ApiService]
+  [LoginScreen]
+  [RegisterScreen]
+  [HomeScreen]
+  [ShopScreen]
+  [CollectionScreen]
+  [BichinhoGameScreen]
+  [OptionsScreen]
+  
+  App -down-> Navigation
+  App -down-> LoginScreen
+  App -down-> RegisterScreen
+  App -down-> HomeScreen
+  App -down-> ShopScreen
+  App -down-> CollectionScreen
+  App -down-> BichinhoGameScreen
+  App -down-> OptionsScreen
+  LoginScreen --> ApiService
+  RegisterScreen --> ApiService
+  HomeScreen --> ApiService
+  ShopScreen --> ApiService
+  CollectionScreen --> ApiService
+  BichinhoGameScreen --> ApiService
+  OptionsScreen --> ApiService
+}
+
+' Backend
+package "Backend\n(Node.js + Express)" {
+  [ExpressServer]
+  [AuthMiddleware]
+  [PetController]
+  [AuthController]
+  [User]
+  [Pet]
+  [CollectedPet]
+  [Firestore]
+
+  ExpressServer --> AuthMiddleware : "JWT"
+  ExpressServer --> PetController
+  ExpressServer --> AuthController
+  PetController --> Firestore
+  AuthController --> Firestore
+  PetController --> Pet
+  PetController --> User
+  AuthController --> User
+  User "1" -- "0..*" Pet : "owns"
+  User "1" -- "0..*" CollectedPet : "collects"
+}
+
+' Comunicação entre Frontend e Backend
+[ApiService] ..> [ExpressServer] : "HTTP REST API"
+
+' Backend <-> Firestore
+[ExpressServer] ..> [Firestore] : "Firebase Admin SDK"
+
+@enduml

@@ -1,0 +1,44 @@
+@startuml
+!pragma diagramType class
+skinparam dpi 150
+skinparam classAttributeIconSize 0
+
+class User {
+  +id : ObjectId
+  +username : String
+  +passwordHash : String
+  +role : String
+  +email : String
+}
+
+class Pet {
+  +ownerId : ObjectId
+  +name : String
+  +dinosaurId : String
+  +stage : String
+  +happiness : Number
+  +fome : Number
+  +energia : Number
+  +lastFed : Date
+  +lastPlayed : Date
+  +lastSlept : Date
+  +lastStepsUpdate : Date
+  +totalStepsLife : Number
+  +dailyStepsGoal : Number
+  +evolutionProgress : Number
+  +createdAt : Date
+}
+
+class CollectedPet {
+  +_id : ObjectId
+  +ownerId : ObjectId
+  +name : String
+  +dinosaurId : String
+  +archivedAt : Date
+}
+
+' Relações
+User "1" -- "0..*" Pet : owns >
+User "1" -- "0..*" CollectedPet : collects >
+
+@enduml
