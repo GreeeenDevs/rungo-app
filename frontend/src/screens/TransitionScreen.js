@@ -33,7 +33,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // O estilo 'overlay' foi removido
+
+  overlay: { 
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)', // ou ajuste a opacidade conforme desejar
+    width: '100%',
+    height: '100%',
+  },
+  
   loadingText: {
     marginTop: 20,
     color: '#000000', // Cor branca para o texto

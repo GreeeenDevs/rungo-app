@@ -17,10 +17,9 @@ const HomeTabs = ({ setLoggedIn }) => { // Recebe setLoggedIn para poder fazer l
       <Stack.Screen name="Transition" component={TransitionScreen} />
       <Stack.Screen name="Loading" component={LoadingScreen} />
       {/* O nome da rota aqui é 'MainTabs' para o TabNavigator */}
-      <Stack.Screen
-        name="MainTabs"
-        component={(props) => <TabNavigator {...props} setLoggedIn={setLoggedIn} />}
-      />
+      <Stack.Screen name="MainTabs">
+        {props => <TabNavigator {...props} setLoggedIn={setLoggedIn} />}
+      </Stack.Screen>
     </Stack.Navigator>
   );
 };

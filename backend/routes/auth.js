@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const { db } = require('../config/firebase-admin-config'); // Importa 'db' do Firestore
 
 const USERS_COLLECTION = 'users';
+const PETS_COLLECTION = 'pets';
 
 const generateToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -36,25 +37,6 @@ router.post('/register', async (req, res) => {
             role: 'user', // Define um papel padrão
             createdAt: new Date(),
         });
-
-        // Criar um pet inicial para o novo usuário no Firestore
-        await db.collection('pets').doc(username).set({ // O ID do documento pet é o username do usuário
-            ownerId: username, // Link para o usuário
-            name: 'Ovo Desconhecido', // Começa como um ovo
-            stage: 'Ovo',
-            happiness: 50,
-            fome: 0, // Inicia sem fome
-            energia: 100, // Inicia com energia total
-            lastFed: new Date(),
-            lastPlayed: new Date(),
-            lastSlept: new Date(),
-            lastStepsUpdate: new Date(),
-            totalStepsLife: 0,
-            dailyStepsGoal: 5000,
-            evolutionProgress: 0, // 0 = ovo, 1 = filhote, 2 = adulto, etc.
-            createdAt: new Date(),
-        });
-
 
         res.status(201).json({
             message: 'Usuário registrado com sucesso!',

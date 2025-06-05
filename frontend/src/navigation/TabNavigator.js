@@ -22,7 +22,7 @@ const TabNavigator = ({ setLoggedIn }) => { // Recebe setLoggedIn aqui
         tabBarStyle: {
           backgroundColor: '#1a202c',
           borderTopWidth: 0,
-          paddingBottom: 5,
+          paddingBottom: 90,
           height: 60,
         },
         tabBarLabelStyle: {
@@ -52,10 +52,9 @@ const TabNavigator = ({ setLoggedIn }) => { // Recebe setLoggedIn aqui
       <Tab.Screen name="Coleção" component={CollectionScreen} />
       <Tab.Screen name="Loja" component={ShopScreen} />
       {/* Passa setLoggedIn para OptionsScreen para permitir logout */}
-      <Tab.Screen
-        name="Opções"
-        component={(props) => <OptionsScreen {...props} setLoggedIn={setLoggedIn} />}
-      />
+      <Tab.Screen name="Opções">
+        {props => <OptionsScreen {...props} setLoggedIn={setLoggedIn} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };

@@ -3,15 +3,16 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
 import Button from '../components/Button';
 import BG from '../../assets/bgscream.gif';
+import { hatchPet } from '../services/apiService'; // Importe a função de API para chocar o ovo
 
 // Importar as imagens dos dinossauros
 // VOCÊ PRECISA TER ESSAS IMAGENS NA PASTA assets/dinosaurs/ (ou ajuste o caminho)
-import dinoAzul from '../../assets/dinosaurs/dino_azul.gif';   // Crie essas pastas e adicione as imagens
-import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.gif';
-import dinoRosa from '../../assets/dinosaurs/dino_rosa.gif';
-import dinoBranco from '../../assets/dinosaurs/dino_branco.gif';
-import dinoPreto from '../../assets/dinosaurs/dino_preto.gif';
-import eggImage from '../../assets/egg.gif'; // Imagem de um ovo genérico
+import dinoAzul from '../../assets/dinosaurs/dino_azul.png';   // Crie essas pastas e adicione as imagens
+import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.png';
+import dinoRosa from '../../assets/dinosaurs/dino_rosa.png';
+import dinoBranco from '../../assets/dinosaurs/dino_branco.png';
+import dinoPreto from '../../assets/dinosaurs/dino_preto.png';
+import eggImage from '../../assets/egg.png'; // Imagem de um ovo genérico
 
 const custoGacha = 100; // Custo para chocar um ovo
 
@@ -30,7 +31,7 @@ const ShopScreen = ({ navigation }) => {
   const [moedas, setMoedas] = useState(500); // Moedas iniciais do jogador
   const [ultimoDinossauroChocado, setUltimoDinossauroChocado] = useState(null); // Para exibir o resultado
 
-  const handleChocarOvo = () => {
+  const handleChocarOvo = async () => {
     if (moedas < custoGacha) {
       Alert.alert('Saldo Insuficiente', 'Você não tem moedas suficientes para chocar um ovo!');
       return;
@@ -52,10 +53,14 @@ const ShopScreen = ({ navigation }) => {
 
     setUltimoDinossauroChocado(dinossauroChocado);
 
-    // TODO: Aqui você precisaria implementar a lógica para "adicionar"
-    // este dinossauro à coleção do usuário ou associá-lo ao pet existente.
-    // Isso pode ser feito via Context API, Redux ou chamadas à sua API de backend.
     console.log(`Dinossauro chocado: ${dinossauroChocado.nome}`);
+
+    // ✅ Chamada da API para salvar o dinossauro na coleção do usuário
+    try {
+      const response = await hatchPet(dinossauroChocado.nome, dinossauroChocado.id);
+    } catch (error) {
+      // O Alert já é tratado dentro de apiCall, então aqui é só log.
+    }
   };
 
   return (

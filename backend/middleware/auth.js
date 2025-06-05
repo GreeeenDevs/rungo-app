@@ -20,7 +20,7 @@ const authenticateJWT = async (req, res, next) => {
         if (!userDoc.exists) {
           return res.sendStatus(404); // Usuário não encontrado (token inválido ou expirado)
         }
-        req.user = { id: userDoc.id, ...userDoc.data() };
+        req.user = { id: userDoc.id, username:userDoc.username, ...userDoc.data() };
         next();
       } catch (error) {
         console.error('Erro ao buscar usuário do Firestore:', error);

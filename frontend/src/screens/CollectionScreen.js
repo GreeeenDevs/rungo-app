@@ -1,19 +1,15 @@
-// src/screens/CollectionScreen.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ImageBackground, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import BG from '../../assets/bgscream.gif';
 import { useFocusEffect } from '@react-navigation/native';
-import { getCollectedDinos } from '../services/apiService'; // Importe a nova função
+import { getCollectedDinos } from '../services/apiService';
 
-// Importar as imagens dos dinossauros (as mesmas da ShopScreen e BichinhoGameScreen)
-import dinoAzul from '../../assets/dinosaurs/dino_azul';
-import dinoVermelho from '../../assets/dinosaurs/dino_vermelho';
-import dinoRosa from '../../assets/dinosaurs/dino_rosa';
-import dinoBranco from '../../assets/dinosaurs/dino_branco';
-import dinoPreto from '../../assets/dinosaurs/dino_preto';
+import dinoAzul from '../../assets/dinosaurs/dino_azul.png';
+import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.png';
+import dinoRosa from '../../assets/dinosaurs/dino_rosa.png';
+import dinoBranco from '../../assets/dinosaurs/dino_branco.png';
+import dinoPreto from '../../assets/dinosaurs/dino_preto.png';
 
-
-// Mapeamento para obter a imagem do dinossauro pelo ID
 const dinosaurImages = {
   dino_azul: dinoAzul,
   dino_vermelho: dinoVermelho,
@@ -22,7 +18,6 @@ const dinosaurImages = {
   dino_preto: dinoPreto,
 };
 
-
 const CollectionScreen = () => {
   const [collectedDinos, setCollectedDinos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,20 +25,21 @@ const CollectionScreen = () => {
   const fetchCollectedDinos = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getCollectedDinos(); // Chama a API para buscar a coleção
-      setCollectedDinos(data);
+      const data = await getCollectedDinos();
+      setCollectedDinos(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erro ao buscar coleção:", error);
       Alert.alert('Erro', error.message || 'Não foi possível carregar sua coleção.');
+      setCollectedDinos([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useFocusEffect( // Recarrega sempre que a tela for focada
+  useFocusEffect(
     useCallback(() => {
       fetchCollectedDinos();
-      return () => {}; // Cleanup function
+      return () => {};
     }, [fetchCollectedDinos])
   );
 
@@ -71,7 +67,7 @@ const CollectionScreen = () => {
             {collectedDinos.map((dino) => (
               <View key={dino._id} style={styles.dinoGridItem}>
                 <Image
-                  source={dinosaurImages[dino.dinosaurId] || dinoAzul} // Usa a imagem pelo ID, default se não encontrar
+                  source={dinosaurImages[dino.dinosaurId] || dinoAzul}
                   style={styles.dinoGridImage}
                   resizeMode="contain"
                 />
@@ -141,7 +137,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     margin: 8,
-    width: 120, // Ajuste o tamanho do item na grade
+    width: 120,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

@@ -1,25 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, ImageBackground, TextInput, TouchableOpacity, Image } from 'react-native';
 import Button from '../components/Button';
-import BG from '../../assets/bgscream';
-import { getPetStatus, hatchPet, feedPet, playWithPet, sleepPet, updatePetHappiness } from '../services/apiService';
+import BG from '../../assets/bgscream.gif';
+import { getPetStatus, hatchPet, feedPet, playWithPet, sleepPet, updatePetHappiness, archivePet } from '../services/apiService';
 import { useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Importe AsyncStorage
-
-// Imagens dos estágios (ajuste os caminhos conforme seus assets)
-import eggImage from '../../assets/egg';
-import babyImage from '../../assets/baby';
-import adultImage from '../../assets/adult';
-import oldImage from '../../assets/old';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Importar as imagens dos dinossauros (as mesmas da ShopScreen)
-import dinoAzul from '../../assets/dinosaurs/dino_azul';
-import dinoVermelho from '../../assets/dinosaurs/dino_vermelho';
-import dinoRosa from '../../assets/dinosaurs/dino_rosa'; //tirei os gif//
-import dinoBranco from '../../assets/dinosaurs/dino_branco';
-import dinoPreto from '../../assets/dinosaurs/dino_preto';
+import dinoAzul from '../../assets/dinosaurs/dino_azul.png';
+import dinoVermelho from '../../assets/dinosaurs/dino_vermelho.png';
+import dinoRosa from '../../assets/dinosaurs/dino_rosa.png';
+import dinoBranco from '../../assets/dinosaurs/dino_branco.png';
+import dinoPreto from '../../assets/dinosaurs/dino_preto.png';
+import eggImage from '../../assets/egg.png'; // Certifique-se de ter essa imagem
+import babyImage from '../../assets/baby.png'; // Placeholder para filhote
+import adultImage from '../../assets/adult.png'; // Placeholder para adulto
+import oldImage from '../../assets/old.png'; // Placeholder para idoso
 
-// Mapeamento para obter a imagem do dinossauro pelo ID (para usar o dinossauro chocado)
 const dinosaurImages = {
   dino_azul: dinoAzul,
   dino_vermelho: dinoVermelho,
@@ -28,14 +25,13 @@ const dinosaurImages = {
   dino_preto: dinoPreto,
 };
 
-
 const BichinhoGameScreen = () => {
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [petName, setPetName] = useState('');
   const [showHatchInput, setShowHatchInput] = useState(false);
   const [stepsInput, setStepsInput] = useState('');
-  const [dinossauroChocadoPeloGacha, setDinossauroChocadoPeloGacha] = useState(null); // Novo estado
+  const [dinossauroChocadoPeloGacha, setDinossauroChocadoPeloGacha] = useState(null);
 
   const fetchPetStatus = useCallback(async () => {
     setLoading(true);
@@ -44,45 +40,40 @@ const BichinhoGameScreen = () => {
       setPet(petData);
       setShowHatchInput(false);
 
-      // Limpa qualquer ovo chocado anterior se já houver um pet ativo
       if (petData) {
         await AsyncStorage.removeItem('novoDinossauroChocado');
         setDinossauroChocadoPeloGacha(null);
       }
-      // NOVO: Verifica se o pet está no estágio "Idoso"
-        if (petData.stage === 'Idoso') {
-          Alert.alert(
-            'Parabéns!',
-            `${petData.name} atingiu a velhice! Ele foi adicionado à sua coleção. Agora você pode chocar um novo bichinho!`,
-            [
-              { text: 'OK', onPress: async () => {
-                try {
-                  await archivePet(petData._id); // Chama a API para arquivar
-                  setPet(null); // Remove o pet atual
-                  setShowHatchInput(true); // Mostra o input para chocar um novo ovo
-                } catch (error) {
-                  console.error("Erro ao arquivar pet:", error);
-                  Alert.alert('Erro', 'Não foi possível arquivar o bichinho. Tente novamente.');
-                }
-              }}
-            ]
-          );
-        }
-      
+
+      if (petData.stage === 'Idoso') {
+        Alert.alert(
+          'Parabéns!',
+          `${petData.name} atingiu a velhice! Ele foi adicionado à sua coleção. Agora você pode chocar um novo bichinho!`,
+          [
+            { text: 'OK', onPress: async () => {
+              try {
+                await archivePet();
+                setPet(null);
+                setShowHatchInput(true);
+              } catch (error) {
+                console.error("Erro ao arquivar pet:", error);
+                Alert.alert('Erro', 'Não foi possível arquivar o bichinho. Tente novamente.');
+              }
+            }}
+          ]
+        );
+      }
 
     } catch (error) {
-      console.error("Erro ao buscar status do pet:", error);
       if (error.message.includes('Bichinho não encontrado') || error.message.includes('404')) {
-        setPet(null); // Define pet como null para indicar que não há pet chocado
-
-        // Verifica se há um novo dinossauro chocado do gacha
+        setPet(null);
         const novoDinoJson = await AsyncStorage.getItem('novoDinossauroChocado');
         if (novoDinoJson) {
           const novoDino = JSON.parse(novoDinoJson);
           setDinossauroChocadoPeloGacha(novoDino);
-          setShowHatchInput(true); // Mostra o input para chocar este ovo
+          setShowHatchInput(true);
         } else {
-          setShowHatchInput(true); // Mostra o input para chocar um ovo padrão se não houver um do gacha
+          setShowHatchInput(true);
         }
       }
     } finally {
@@ -94,8 +85,6 @@ const BichinhoGameScreen = () => {
     useCallback(() => {
       fetchPetStatus();
       const interval = setInterval(() => {
-        // Você pode ajustar a lógica aqui para só buscar se a tela estiver visível
-        // Ou mover a decadência para o backend ou para um Context global
         fetchPetStatus();
       }, 60 * 1000);
 
@@ -103,25 +92,24 @@ const BichinhoGameScreen = () => {
     }, [fetchPetStatus])
   );
 
-
   const handleHatchPet = async () => {
     if (!petName.trim()) {
       Alert.alert('Erro', 'Por favor, dê um nome ao seu bichinho!');
       return;
     }
 
-    let dinoIdToHatch = 'default_egg'; // Ovo padrão
+    let dinoIdToHatch = 'dino_azul';
     if (dinossauroChocadoPeloGacha) {
-      dinoIdToHatch = dinossauroChocadoPeloGacha.id; // Usa o ID do dino chocado pelo gacha
+      dinoIdToHatch = dinossauroChocadoPeloGacha.id;
     }
 
     try {
-      const hatchedPet = await hatchPet(petName, dinoIdToHatch); // Passa o ID do dinossauro para a API
+      const hatchedPet = await hatchPet(petName, dinoIdToHatch);
       setPet(hatchedPet);
       Alert.alert('Sucesso', `Parabéns! Seu bichinho ${hatchedPet.name} (${dinossauroChocadoPeloGacha?.nome || 'ovo padrão'}) nasceu!`);
       setShowHatchInput(false);
-      setDinossauroChocadoPeloGacha(null); // Limpa o estado
-      await AsyncStorage.removeItem('novoDinossauroChocado'); // Limpa do storage
+      setDinossauroChocadoPeloGacha(null);
+      await AsyncStorage.removeItem('novoDinossauroChocado');
     } catch (error) {
       console.error("Erro ao chocar pet:", error);
       Alert.alert('Erro', error.message || 'Não foi possível chocar o bichinho.');
@@ -167,7 +155,7 @@ const BichinhoGameScreen = () => {
     try {
       const updatedPet = await updatePetHappiness(parsedSteps);
       setPet(updatedPet);
-      setStepsInput(''); // Limpa o input
+      setStepsInput('');
       Alert.alert('Sucesso', `Felicidade de ${updatedPet.name} atualizada com ${parsedSteps} passos!`);
     } catch (error) {
       Alert.alert('Erro', error.message || 'Não foi possível atualizar a felicidade.');
@@ -176,10 +164,8 @@ const BichinhoGameScreen = () => {
 
   const getPetImage = (stage, dinossauroId = null) => {
     if (dinossauroId && dinosaurImages[dinossauroId]) {
-      // Se tiver um ID de dinossauro chocado, usa a imagem do dinossauro
       return dinosaurImages[dinossauroId];
     }
-    // Caso contrário, usa as imagens de estágio padrão ou um ovo genérico
     switch (stage) {
       case 'Ovo': return eggImage;
       case 'Filhote': return babyImage;
@@ -228,7 +214,6 @@ const BichinhoGameScreen = () => {
           pet && (
             <View style={styles.gameContainer}>
               <Text style={styles.bichinhoName}>{pet.name}</Text>
-              {/* Agora passa o ID do dinossauro, se existir no pet */}
               <Image source={getPetImage(pet.stage, pet.dinosaurId)} style={styles.petImage} resizeMode="contain" />
 
               <View style={styles.statsContainer}>

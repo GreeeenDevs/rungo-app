@@ -64,7 +64,7 @@ const SplashScreen = ({ navigation }) => {
               },
             ]}
           >
-            Rungo APP
+            <Text>Rungo APP</Text>
           </Animated.Text>
           <Text style={styles.tapToStartText}>Toque para Começar</Text>
         </View>

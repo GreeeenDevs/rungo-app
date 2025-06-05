@@ -14,8 +14,6 @@ const { authenticateJWT, authorizeRole } = require('./middleware/auth');
 
 // Importa as rotas
 const authRoutes = require('./routes/auth'); // Agora o login/registro estará aqui
-const publicRoutes = require('./routes/public');
-const adminRoutes = require('./routes/admin');
 const petRoutes = require('./routes/petRoutes'); // Suas novas rotas de pet
 
 const app = express();
@@ -27,10 +25,8 @@ app.use(bodyParser.json());
 
 // --- Rotas ---
 app.use('/auth', authRoutes); // Rotas de login e registro
-app.use('/public', publicRoutes); // Rotas públicas
 
 // Todas as rotas abaixo destas precisarão de autenticação JWT
-app.use('/admin', authenticateJWT, authorizeRole('admin'), adminRoutes);
 app.use('/api/pet', authenticateJWT, petRoutes); // Rotas protegidas para o bichinho
 
 app.get('/', (req, res) => {
